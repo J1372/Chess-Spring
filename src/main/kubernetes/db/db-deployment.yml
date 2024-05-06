@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: mysql
+        image: mysql
+        imagePullPolicy: Always
+        envFrom:
+          - secretRef:
+              name: db-secret
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 3306
+            name: db-port
+        volumeMounts:
+          - name: "chess-db"
+            mountPath: "/var/lib/mysql"
+      volumes:
+        - name: "chess-db"
+          persistentVolumeClaim:
+            claimName: "db-pvc"
